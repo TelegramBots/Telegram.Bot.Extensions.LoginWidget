@@ -9,7 +9,7 @@ Built according to specifications published on [Telegram's website](https://core
 Dictionary<string, string> fields = QueryStringFields;
 
 LoginWidget loginWidget = new LoginWidget("your API access Token");
-if (loginWidget.CheckAuthorization() == Authorization.Valid)
+if (loginWidget.CheckAuthorization(fields) == Authorization.Valid)
 {
     // ...
 }

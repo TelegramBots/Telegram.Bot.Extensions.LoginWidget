@@ -62,10 +62,10 @@ namespace Telegram.Bot.Extensions.LoginWidget
                 return Authorization.TooOld;
 
             string data_check_string =
-                Fields.AuthDate  + "=" + fields[Fields.AuthDate] + '\n' +
-                Fields.FirstName + "=" + fields[Fields.FirstName] + '\n' +
-                Fields.Id        + "=" + fields[Fields.Id] + '\n' +
-                Fields.PhotoUrl  + "=" + fields[Fields.PhotoUrl] + '\n' +
+                Fields.AuthDate  + "=" + fields[Fields.AuthDate]    + '\n' +
+                Fields.FirstName + "=" + fields[Fields.FirstName]   + '\n' +
+                Fields.Id        + "=" + fields[Fields.Id]          + '\n' +
+                Fields.PhotoUrl  + "=" + fields[Fields.PhotoUrl]    + '\n' +
                 Fields.Username  + "=" + fields[Fields.Username];
 
             byte[] signature = _hmac.ComputeHash(Encoding.UTF8.GetBytes(data_check_string));

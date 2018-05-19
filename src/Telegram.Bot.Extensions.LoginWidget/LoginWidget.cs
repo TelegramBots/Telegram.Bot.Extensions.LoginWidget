@@ -2,6 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Linq;
 
 namespace Telegram.Bot.Extensions.LoginWidget
 {
@@ -25,7 +26,7 @@ namespace Telegram.Bot.Extensions.LoginWidget
         /// <param name="token">The bot API token used as a secret parameter when checking authorization</param>
         public LoginWidget(string token)
         {
-            if (token == null) throw new ArgumentNullException("token");
+            if (token == null) throw new ArgumentNullException(nameof(token));
 
             using (SHA256 sha256 = SHA256.Create())
             {
@@ -40,38 +41,38 @@ namespace Telegram.Bot.Extensions.LoginWidget
         /// <returns></returns>
         public Authorization CheckAuthorization(Dictionary<string, string> fields)
         {
-            if (_disposed) throw new ObjectDisposedException("LoginWidget");
-            if (fields == null) throw new ArgumentNullException("fields");
+            if (_disposed) throw new ObjectDisposedException(nameof(LoginWidget));
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
             if (fields.Count < 6) return Authorization.MissingFields;
 
-            if (!fields.ContainsKey("auth_date")) return Authorization.MissingFields;
-            if (!fields.ContainsKey("first_name")) return Authorization.MissingFields;
-            if (!fields.ContainsKey("id")) return Authorization.MissingFields;
-            if (!fields.ContainsKey("photo_url")) return Authorization.MissingFields;
-            if (!fields.ContainsKey("username")) return Authorization.MissingFields;
-            if (!fields.ContainsKey("hash")) return Authorization.MissingFields;
+            if (!fields.ContainsKey(Fields.AuthDate) ||
+                !fields.ContainsKey(Fields.FirstName) ||
+                !fields.ContainsKey(Fields.Id) ||
+                !fields.ContainsKey(Fields.PhotoUrl) ||
+                !fields.ContainsKey(Fields.Username) ||
+                !fields.ContainsKey(Fields.Hash)
+            ) return Authorization.MissingFields;
 
-            if (long.TryParse(fields["auth_date"], out long timestamp))
-            {
-                if (Math.Abs(DateTime.UtcNow.Subtract(_unixStart).TotalSeconds - timestamp) > AllowedTimeOffset)
-                    return Authorization.TooOld;
-            }
-            else return Authorization.InvalidAuthDateFormat;
+            if (fields[Fields.Hash].Length != 64) return Authorization.InvalidHash;
 
-            string hash = fields["hash"];
-            if (hash.Length != 64) return Authorization.InvalidHash;
+            if (!long.TryParse(fields[Fields.AuthDate], out long timestamp))
+                return Authorization.InvalidAuthDateFormat;
+
+            if (Math.Abs(DateTime.UtcNow.Subtract(_unixStart).TotalSeconds - timestamp) > AllowedTimeOffset)
+                return Authorization.TooOld;
 
             string data_check_string =
-                "auth_date="    + fields["auth_date"]   + '\n' +
-                "first_name="   + fields["first_name"]  + '\n' +
-                "id="           + fields["id"]          + '\n' +
-                "photo_url="    + fields["photo_url"]   + '\n' +
-                "username="     + fields["username"];
+                Fields.AuthDate  + "=" + fields[Fields.AuthDate]    + '\n' +
+                Fields.FirstName + "=" + fields[Fields.FirstName]   + '\n' +
+                Fields.Id        + "=" + fields[Fields.Id]          + '\n' +
+                Fields.PhotoUrl  + "=" + fields[Fields.PhotoUrl]    + '\n' +
+                Fields.Username  + "=" + fields[Fields.Username];
 
             byte[] signature = _hmac.ComputeHash(Encoding.UTF8.GetBytes(data_check_string));
+            string hash = fields[Fields.Hash];
 
             // Taken from: bool MihaZupan.Algorithms.Hex.ByteArrayMatchesHexString_Lowercase(byte[] bytes, string hex)
-            // Addapted from: https://stackoverflow.com/a/14333437/6845657
+            // Adapted from: https://stackoverflow.com/a/14333437/6845657
             for (int i = 0; i < signature.Length; i++)
             {
                 if (hash[i * 2] != 87 + (signature[i] >> 4) + ((((signature[i] >> 4) - 10) >> 31) & -39)) return Authorization.InvalidHash;
@@ -80,7 +81,6 @@ namespace Telegram.Bot.Extensions.LoginWidget
 
             // Alternative method (14x slower):
             // if (BitConverter.ToString(signature).Replace("-", "").ToLower() != hash) return Authorization.InvalidHash;
-            
             return Authorization.Valid;
         }
 
@@ -89,30 +89,16 @@ namespace Telegram.Bot.Extensions.LoginWidget
         /// </summary>
         /// <param name="fields">A collection containing query string fields as key-value pairs</param>
         /// <returns></returns>
-        public Authorization CheckAuthorization(IEnumerable<KeyValuePair<string, string>> fields)
-        {
-            Dictionary<string, string> fieldsDictionary = new Dictionary<string, string>(6);
-            foreach (KeyValuePair<string, string> field in fields)
-            {
-                fieldsDictionary.Add(field.Key, field.Value);
-            }
-            return CheckAuthorization(fieldsDictionary);
-        }
+        public Authorization CheckAuthorization(IEnumerable<KeyValuePair<string, string>> fields) =>
+            CheckAuthorization(fields.ToDictionary(f => f.Key, f => f.Value));
 
         /// <summary>
         /// Checks whether the authorization data received from the user is valid
         /// </summary>
         /// <param name="fields">A collection containing query string fields as key-value pairs</param>
         /// <returns></returns>
-        public Authorization CheckAuthorization(IEnumerable<Tuple<string, string>> fields)
-        {
-            Dictionary<string, string> fieldsDictionary = new Dictionary<string, string>(6);
-            foreach (Tuple<string, string> field in fields)
-            {
-                fieldsDictionary.Add(field.Item1, field.Item2);
-            }
-            return CheckAuthorization(fieldsDictionary);
-        }
+        public Authorization CheckAuthorization(IEnumerable<Tuple<string, string>> fields) =>
+            CheckAuthorization(fields.ToDictionary(f => f.Item1, f => f.Item2));
 
         public void Dispose()
         {
@@ -121,6 +107,16 @@ namespace Telegram.Bot.Extensions.LoginWidget
                 _disposed = true;
                 _hmac?.Dispose();
             }
+        }
+
+        private static class Fields
+        {
+            public const string AuthDate = "auth_date";
+            public const string FirstName = "first_name";
+            public const string Id = "id";
+            public const string PhotoUrl = "photo_url";
+            public const string Username = "username";
+            public const string Hash = "hash";
         }
     }
 }

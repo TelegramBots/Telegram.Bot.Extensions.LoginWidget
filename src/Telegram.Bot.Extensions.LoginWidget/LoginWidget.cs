@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -45,31 +45,31 @@ namespace Telegram.Bot.Extensions.LoginWidget
             if (fields == null) throw new ArgumentNullException(nameof(fields));
             if (fields.Count < 6) return Authorization.MissingFields;
 
-            if (!fields.ContainsKey(Fields.AuthDate) ||
-                !fields.ContainsKey(Fields.FirstName) ||
-                !fields.ContainsKey(Fields.Id) ||
-                !fields.ContainsKey(Fields.PhotoUrl) ||
-                !fields.ContainsKey(Fields.Username) ||
-                !fields.ContainsKey(Fields.Hash)
+            if (!fields.ContainsKey(Field.AuthDate) ||
+                !fields.ContainsKey(Field.FirstName) ||
+                !fields.ContainsKey(Field.Id) ||
+                !fields.ContainsKey(Field.PhotoUrl) ||
+                !fields.ContainsKey(Field.Username) ||
+                !fields.ContainsKey(Field.Hash)
             ) return Authorization.MissingFields;
 
-            if (fields[Fields.Hash].Length != 64) return Authorization.InvalidHash;
+            if (fields[Field.Hash].Length != 64) return Authorization.InvalidHash;
 
-            if (!long.TryParse(fields[Fields.AuthDate], out long timestamp))
+            if (!long.TryParse(fields[Field.AuthDate], out long timestamp))
                 return Authorization.InvalidAuthDateFormat;
 
             if (Math.Abs(DateTime.UtcNow.Subtract(_unixStart).TotalSeconds - timestamp) > AllowedTimeOffset)
                 return Authorization.TooOld;
 
             string data_check_string =
-                Fields.AuthDate  + "=" + fields[Fields.AuthDate]    + '\n' +
-                Fields.FirstName + "=" + fields[Fields.FirstName]   + '\n' +
-                Fields.Id        + "=" + fields[Fields.Id]          + '\n' +
-                Fields.PhotoUrl  + "=" + fields[Fields.PhotoUrl]    + '\n' +
-                Fields.Username  + "=" + fields[Fields.Username];
+                Field.AuthDate  + "=" + fields[Field.AuthDate]    + '\n' +
+                Field.FirstName + "=" + fields[Field.FirstName]   + '\n' +
+                Field.Id        + "=" + fields[Field.Id]          + '\n' +
+                Field.PhotoUrl  + "=" + fields[Field.PhotoUrl]    + '\n' +
+                Field.Username  + "=" + fields[Field.Username];
 
             byte[] signature = _hmac.ComputeHash(Encoding.UTF8.GetBytes(data_check_string));
-            string hash = fields[Fields.Hash];
+            string hash = fields[Field.Hash];
 
             // Taken from: bool MihaZupan.Algorithms.Hex.ByteArrayMatchesHexString_Lowercase(byte[] bytes, string hex)
             // Adapted from: https://stackoverflow.com/a/14333437/6845657
@@ -109,7 +109,7 @@ namespace Telegram.Bot.Extensions.LoginWidget
             }
         }
 
-        private static class Fields
+        private static class Field
         {
             public const string AuthDate = "auth_date";
             public const string FirstName = "first_name";

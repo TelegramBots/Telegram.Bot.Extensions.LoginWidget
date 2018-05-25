@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.Extensions.Log
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{81E021D2-D465-454A-AA5A-DA4023606926}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		CHANGELOG.md = CHANGELOG.md
 		README.md = README.md
 	EndProjectSection
@@ -16,8 +17,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{898D16EB-405A-4521-A269-556F4A8A630B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.Extensions.LoginWidget.Tests.Unit", "test\Telegram.Bot.Extensions.LoginWidget.Tests.Unit\Telegram.Bot.Extensions.LoginWidget.Tests.Unit.csproj", "{B296CB99-3FA5-4BF5-BC22-43A32D3CBA88}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram.Bot.Extensions.LoginWidget.Tests.TestDataGenerator", "test\Telegram.Bot.Extensions.LoginWidget.Tests.TestDataGenerator\Telegram.Bot.Extensions.LoginWidget.Tests.TestDataGenerator.csproj", "{497D58FA-BA0C-47D4-AFC6-DB2055CB37D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +32,6 @@ Global
 		{B296CB99-3FA5-4BF5-BC22-43A32D3CBA88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B296CB99-3FA5-4BF5-BC22-43A32D3CBA88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B296CB99-3FA5-4BF5-BC22-43A32D3CBA88}.Release|Any CPU.Build.0 = Release|Any CPU
-		{497D58FA-BA0C-47D4-AFC6-DB2055CB37D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{497D58FA-BA0C-47D4-AFC6-DB2055CB37D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{497D58FA-BA0C-47D4-AFC6-DB2055CB37D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{497D58FA-BA0C-47D4-AFC6-DB2055CB37D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,7 +39,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{8B0BB536-17B1-43F1-A8B6-123100B8835E} = {DAB85662-F703-4CAC-A4A2-2C925BEE4470}
 		{B296CB99-3FA5-4BF5-BC22-43A32D3CBA88} = {898D16EB-405A-4521-A269-556F4A8A630B}
-		{497D58FA-BA0C-47D4-AFC6-DB2055CB37D7} = {898D16EB-405A-4521-A269-556F4A8A630B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {900883F5-838A-4A5F-909B-4ABF2E16F77F}

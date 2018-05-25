@@ -1,26 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
 {
-    public class LoginWidgetTests
+    public class LoginWidgetTests : IClassFixture<LoginWidgetTestsFixture>
     {
-        // Fake token used to generate test data
-        private static readonly string TestBotToken =
-            File.ReadAllText(@"..\..\..\TestData\TestToken.txt");
+        private readonly LoginWidgetTestsFixture _fixture;
+
         private readonly LoginWidget _loginWidget;
 
-        public LoginWidgetTests()
+        public LoginWidgetTests(LoginWidgetTestsFixture fixture)
         {
-            _loginWidget = new LoginWidget(TestBotToken)
+            _fixture = fixture;
+
+            _loginWidget = new LoginWidget(_fixture.Token)
             {
-                AllowedTimeOffset = long.MaxValue // We are using old test data
+                AllowedTimeOffset = 60
             };
         }
-        
+
         [Fact]
         public void Detect_MissingField_AuthDate()
         {
@@ -33,7 +32,9 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "hash",       string.Empty }
             };
 
-            Assert.Equal(Authorization.MissingFields, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.MissingFields, authorizationResult);
         }
 
         [Fact]
@@ -48,7 +49,9 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "hash",       string.Empty }
             };
 
-            Assert.Equal(Authorization.MissingFields, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.MissingFields, authorizationResult);
         }
 
         [Fact]
@@ -63,7 +66,9 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "hash",       string.Empty }
             };
 
-            Assert.Equal(Authorization.MissingFields, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.MissingFields, authorizationResult);
         }
 
         [Fact]
@@ -78,7 +83,9 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "hash",       string.Empty }
             };
 
-            Assert.Equal(Authorization.MissingFields, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.MissingFields, authorizationResult);
         }
 
         [Fact]
@@ -93,7 +100,9 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "hash",       string.Empty }
             };
 
-            Assert.Equal(Authorization.MissingFields, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.MissingFields, authorizationResult);
         }
 
         [Fact]
@@ -108,9 +117,11 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "username",   string.Empty }
             };
 
-            Assert.Equal(Authorization.MissingFields, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.MissingFields, authorizationResult);
         }
-        
+
         [Fact]
         public void Detect_InvalidFormat_AuthDate()
         {
@@ -121,10 +132,12 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "id",         string.Empty },
                 { "photo_url",  string.Empty },
                 { "username",   string.Empty },
-                { "hash",       string.Empty }
+                { "hash",       "d5e0dfc1d85d8e0488647a8e62adc55bcf49a8ef598a446f42186b646f35728e" }
             };
 
-            Assert.Equal(Authorization.InvalidAuthDateFormat, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.InvalidAuthDateFormat, authorizationResult);
         }
 
         [Fact]
@@ -140,10 +153,12 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "id",         string.Empty },
                 { "photo_url",  string.Empty },
                 { "username",   string.Empty },
-                { "hash",       string.Empty }
+                { "hash",       "d5e0dfc1d85d8e0488647a8e62adc55bcf49a8ef598a446f42186b646f35728e" }
             };
 
-            Assert.Equal(Authorization.TooOld, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.Equal(Authorization.TooOld, authorizationResult);
         }
 
         [Fact]
@@ -157,36 +172,35 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 { "id",         string.Empty },
                 { "photo_url",  string.Empty },
                 { "username",   string.Empty },
-                { "hash",       string.Empty }
+                { "hash",       "d5e0dfc1d85d8e0488647a8e62adc55bcf49a8ef598a446f42186b646f35728e" }
             };
 
-            // Will actually be Authorization.InvalidHash
-            Assert.NotEqual(Authorization.TooOld, _loginWidget.CheckAuthorization(fields));
+            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+            Assert.NotEqual(Authorization.TooOld, authorizationResult);
         }
 
         [Fact]
         public void Recognises_Valid_Authorization()
         {
-            // ValidTests.json contains valid test data generated using the TestBotToken
-            Dictionary<string, string>[] validTests =
-                JsonConvert.DeserializeObject<Dictionary<string, string>[]>(File.ReadAllText(@"..\..\..\TestData\ValidTests.json"));
-
-            foreach (Dictionary<string, string> fields in validTests)
+            // ValidTests contains valid test data generated using the TestBotToken
+            foreach (Dictionary<string, string> fields in _fixture.ValidTests)
             {
-                Assert.Equal(Authorization.Valid, _loginWidget.CheckAuthorization(fields));
+                Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+                Assert.Equal(Authorization.Valid, authorizationResult);
             }
         }
 
         [Fact]
         public void Recognises_Invalid_Authorization()
         {
-            // InvalidTests.json contains invalid test data generated using the TestBotToken
-            Dictionary<string, string>[] invalidTests =
-                JsonConvert.DeserializeObject<Dictionary<string, string>[]>(File.ReadAllText(@"..\..\..\TestData\InvalidTests.json"));
-
-            foreach (Dictionary<string, string> fields in invalidTests)
+            // InvalidTests contains invalid test data generated using the TestBotToken
+            foreach (Dictionary<string, string> fields in _fixture.InvalidTests)
             {
-                Assert.Equal(Authorization.InvalidHash, _loginWidget.CheckAuthorization(fields));
+                Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
+
+                Assert.Equal(Authorization.InvalidHash, authorizationResult);
             }
         }
     }

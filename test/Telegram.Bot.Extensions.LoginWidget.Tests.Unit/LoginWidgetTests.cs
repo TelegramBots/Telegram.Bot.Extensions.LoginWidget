@@ -143,12 +143,10 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
         [Fact]
         public void Detect_TooOldAuthorization()
         {
-            _loginWidget.AllowedTimeOffset = 30;
-
             Dictionary<string, string> fields = new Dictionary<string, string>()
             {
-                // Test with January 1st 2018
-                { "auth_date",  (new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / 10000).ToString() },
+                // Test with January 1st 1970
+                { "auth_date",  "0" },
                 { "first_name", string.Empty },
                 { "id",         string.Empty },
                 { "photo_url",  string.Empty },
@@ -166,8 +164,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
         {
             Dictionary<string, string> fields = new Dictionary<string, string>()
             {
-                // Test with January 1st 2018
-                { "auth_date",  (new DateTime(2018, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks / 10000).ToString() },
+                { "auth_date",  _fixture.CurrentTimestamp },
                 { "first_name", string.Empty },
                 { "id",         string.Empty },
                 { "photo_url",  string.Empty },

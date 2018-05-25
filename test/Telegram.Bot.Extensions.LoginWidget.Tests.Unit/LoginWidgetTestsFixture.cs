@@ -13,12 +13,16 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
 
         public readonly string Token = RandomString();
 
+        public readonly string CurrentTimestamp;
+
         public readonly Dictionary<string, string>[] ValidTests = new Dictionary<string, string>[_testCount];
 
         public readonly Dictionary<string, string>[] InvalidTests = new Dictionary<string, string>[_testCount];
 
         public LoginWidgetTestsFixture()
         {
+            CurrentTimestamp = ((long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds).ToString();
+
             using (HMACSHA256 hmac = new HMACSHA256())
             {
                 using (SHA256 sha256 = SHA256.Create())
@@ -37,7 +41,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             {
                 Dictionary<string, string> fields = new Dictionary<string, string>
                 {
-                    { "auth_date", RandomTime() },
+                    { "auth_date", CurrentTimestamp },
                     { "first_name", RandomString() },
                     { "id", RandomString() },
                     { "photo_url", RandomString() },
@@ -56,12 +60,12 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 // replace field with random data
                 Dictionary<string, string> fields = new Dictionary<string, string>
                 {
-                    { "auth_date",  (i % 6) == 0 ? RandomTime()   : ValidTests[i]["auth_date"] },
-                    { "first_name", (i % 6) == 1 ? RandomString() : ValidTests[i]["first_name"] },
-                    { "id",         (i % 6) == 2 ? RandomString() : ValidTests[i]["id"] },
-                    { "photo_url",  (i % 6) == 3 ? RandomString() : ValidTests[i]["photo_url"] },
-                    { "username",   (i % 6) == 4 ? RandomString() : ValidTests[i]["username"] },
-                    { "hash",       (i % 6) == 5 ? RandomString(_random.Next() % 2 == 0 ? 64 : _random.Next(1, 100)) : ValidTests[i]["hash"] }
+                    { "auth_date",  CurrentTimestamp },
+                    { "first_name", (i % 5) == 0 ? RandomString() : ValidTests[i]["first_name"] },
+                    { "id",         (i % 5) == 1 ? RandomString() : ValidTests[i]["id"] },
+                    { "photo_url",  (i % 5) == 2 ? RandomString() : ValidTests[i]["photo_url"] },
+                    { "username",   (i % 5) == 3 ? RandomString() : ValidTests[i]["username"] },
+                    { "hash",       (i % 5) == 4 ? RandomString(_random.Next() % 2 == 0 ? 64 : _random.Next(1, 100)) : ValidTests[i]["hash"] }
                 };
 
                 InvalidTests[i] = fields;
@@ -77,14 +81,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
                 return Convert.ToBase64String(random).Substring(0, length);
             }
         }
-
-        private static string RandomTime()
-        {
-            long time = DateTime.Now.Ticks / 10000;
-            time += _random.Next(-1000000, 1000000);
-            return time.ToString();
-        }
-
+        
         private static string ComputeHash(Dictionary<string, string> fields, HMACSHA256 hmac)
         {
             string data_check_string =

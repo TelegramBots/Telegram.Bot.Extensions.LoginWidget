@@ -5,6 +5,18 @@
 	<AssemblyName>Telegram.Bot.Extensions.LoginWidget</AssemblyName>
 	<RootNamespace>Telegram.Bot.Extensions.LoginWidget</RootNamespace>
 	<LangVersion>latest</LangVersion>
+	<Copyright>Copyright © github.com/TelegramBots team 2018</Copyright>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<Description>Allows you to generate embed JavaScript for the Telegram login widget and verify the hashes received.</Description>
+	<PackageLicenseUrl>https://raw.githubusercontent.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget/master/LICENSE</PackageLicenseUrl>
+	<Company>github.com/TelegramBots</Company>
+	<Authors>MihaZupan,TelegramBots</Authors>
+	<PackageProjectUrl>https://github.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget.git</RepositoryUrl>
+	<PackageTags>Telegram;Bot;Api;Telegram-login;Login-widget;</PackageTags>
+	<PackageIconUrl>https://telegram.org/img/t_logo.png</PackageIconUrl>
+	<PackageId>Telegram.Bot.Extensions.LoginWidget</PackageId>
+	<Product>Telegram.Bot.Extensions.LoginWidget</Product>
   </PropertyGroup>
 
   <ItemGroup>

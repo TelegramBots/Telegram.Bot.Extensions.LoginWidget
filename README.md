@@ -14,3 +14,13 @@ if (loginWidget.CheckAuthorization(fields) == Authorization.Valid)
     // ...
 }
 ```
+
+## Installation
+
+Install as [NuGet package](https://www.nuget.org/packages/Telegram.Bot.Extensions.LoginWidget/):
+
+Package manager:
+
+```powershell
+Install-Package Telegram.Bot.Extensions.LoginWidget
+```

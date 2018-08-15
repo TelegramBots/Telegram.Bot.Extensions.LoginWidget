@@ -65,6 +65,7 @@ namespace Telegram.Bot.Extensions.LoginWidget
                 Field.AuthDate  + "=" + fields[Field.AuthDate]    + '\n' +
                 Field.FirstName + "=" + fields[Field.FirstName]   + '\n' +
                 Field.Id        + "=" + fields[Field.Id]          + '\n' +
+                (fields.ContainsKey(Field.LastName) ? (Field.LastName + "=" + fields[Field.LastName] + '\n') : "") +
                 Field.PhotoUrl  + "=" + fields[Field.PhotoUrl]    + '\n' +
                 Field.Username  + "=" + fields[Field.Username];
 
@@ -113,6 +114,7 @@ namespace Telegram.Bot.Extensions.LoginWidget
         {
             public const string AuthDate = "auth_date";
             public const string FirstName = "first_name";
+            public const string LastName = "last_name";
             public const string Id = "id";
             public const string PhotoUrl = "photo_url";
             public const string Username = "username";

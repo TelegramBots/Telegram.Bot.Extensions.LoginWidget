@@ -1,6 +1,13 @@
 # Changelog
 
-## [Unreleased]
+
+## [1.1.0]
+
+### Fixed
+
+- Now validates hashes with `last_name` set as well
+
+## [1.0.0]
 
 ### Added
 

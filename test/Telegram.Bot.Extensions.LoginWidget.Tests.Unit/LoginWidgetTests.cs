@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -25,27 +24,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
         {
             Dictionary<string, string> fields = new Dictionary<string, string>()
             {
-                { "first_name", string.Empty },
                 { "id",         string.Empty },
-                { "photo_url",  string.Empty },
-                { "username",   string.Empty },
-                { "hash",       string.Empty }
-            };
-
-            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
-
-            Assert.Equal(Authorization.MissingFields, authorizationResult);
-        }
-
-        [Fact]
-        public void Detect_MissingField_FirstName()
-        {
-            Dictionary<string, string> fields = new Dictionary<string, string>()
-            {
-                { "auth_date",  string.Empty },
-                { "id",         string.Empty },
-                { "photo_url",  string.Empty },
-                { "username",   string.Empty },
                 { "hash",       string.Empty }
             };
 
@@ -60,43 +39,6 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             Dictionary<string, string> fields = new Dictionary<string, string>()
             {
                 { "auth_date",  string.Empty },
-                { "first_name", string.Empty },
-                { "photo_url",  string.Empty },
-                { "username",   string.Empty },
-                { "hash",       string.Empty }
-            };
-
-            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
-
-            Assert.Equal(Authorization.MissingFields, authorizationResult);
-        }
-
-        [Fact]
-        public void Detect_MissingField_PhotoUrl()
-        {
-            Dictionary<string, string> fields = new Dictionary<string, string>()
-            {
-                { "auth_date",  string.Empty },
-                { "first_name", string.Empty },
-                { "id",         string.Empty },
-                { "username",   string.Empty },
-                { "hash",       string.Empty }
-            };
-
-            Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
-
-            Assert.Equal(Authorization.MissingFields, authorizationResult);
-        }
-
-        [Fact]
-        public void Detect_MissingField_Username()
-        {
-            Dictionary<string, string> fields = new Dictionary<string, string>()
-            {
-                { "auth_date",  string.Empty },
-                { "first_name", string.Empty },
-                { "id",         string.Empty },
-                { "photo_url",  string.Empty },
                 { "hash",       string.Empty }
             };
 
@@ -111,10 +53,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             Dictionary<string, string> fields = new Dictionary<string, string>()
             {
                 { "auth_date",  string.Empty },
-                { "first_name", string.Empty },
                 { "id",         string.Empty },
-                { "photo_url",  string.Empty },
-                { "username",   string.Empty }
             };
 
             Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
@@ -128,10 +67,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             Dictionary<string, string> fields = new Dictionary<string, string>()
             {
                 { "auth_date",  "Not a number" },
-                { "first_name", string.Empty },
                 { "id",         string.Empty },
-                { "photo_url",  string.Empty },
-                { "username",   string.Empty },
                 { "hash",       "d5e0dfc1d85d8e0488647a8e62adc55bcf49a8ef598a446f42186b646f35728e" }
             };
 
@@ -147,10 +83,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             {
                 // Test with January 1st 1970
                 { "auth_date",  "0" },
-                { "first_name", string.Empty },
                 { "id",         string.Empty },
-                { "photo_url",  string.Empty },
-                { "username",   string.Empty },
                 { "hash",       "d5e0dfc1d85d8e0488647a8e62adc55bcf49a8ef598a446f42186b646f35728e" }
             };
 
@@ -165,10 +98,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             Dictionary<string, string> fields = new Dictionary<string, string>()
             {
                 { "auth_date",  _fixture.CurrentTimestamp },
-                { "first_name", string.Empty },
                 { "id",         string.Empty },
-                { "photo_url",  string.Empty },
-                { "username",   string.Empty },
                 { "hash",       "d5e0dfc1d85d8e0488647a8e62adc55bcf49a8ef598a446f42186b646f35728e" }
             };
 
@@ -181,7 +111,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
         public void Recognises_Valid_Authorization()
         {
             // ValidTests contains valid test data generated using the TestBotToken
-            foreach (Dictionary<string, string> fields in _fixture.ValidTests)
+            foreach (SortedDictionary<string, string> fields in _fixture.ValidTests)
             {
                 Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
 
@@ -193,11 +123,27 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
         public void Recognises_Invalid_Authorization()
         {
             // InvalidTests contains invalid test data generated using the TestBotToken
-            foreach (Dictionary<string, string> fields in _fixture.InvalidTests)
+            foreach (SortedDictionary<string, string> fields in _fixture.InvalidTests)
             {
                 Authorization authorizationResult = _loginWidget.CheckAuthorization(fields);
 
                 Assert.Equal(Authorization.InvalidHash, authorizationResult);
+            }
+        }
+
+        [Fact]
+        public void Real_Data_Valid()
+        {
+            LoginWidget loginWidget = new LoginWidget(LoginWidgetTestsFixture.RealLifeDataTests_Token)
+            {
+                AllowedTimeOffset = int.MaxValue
+            };
+
+            foreach (SortedDictionary<string, string> testData in LoginWidgetTestsFixture.RealLifeDataTests)
+            {
+                Authorization authorizationResult = loginWidget.CheckAuthorization(testData);
+
+                Assert.Equal(Authorization.Valid, authorizationResult);
             }
         }
     }

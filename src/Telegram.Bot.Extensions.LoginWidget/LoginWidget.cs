@@ -37,42 +37,40 @@ namespace Telegram.Bot.Extensions.LoginWidget
         /// <summary>
         /// Checks whether the authorization data received from the user is valid
         /// </summary>
-        /// <param name="fields">A collection containing query string fields as key-value pairs</param>
+        /// <param name="fields">A collection containing query string fields as sorted key-value pairs</param>
         /// <returns></returns>
-        public Authorization CheckAuthorization(Dictionary<string, string> fields)
+        public Authorization CheckAuthorization(SortedDictionary<string, string> fields)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(LoginWidget));
             if (fields == null) throw new ArgumentNullException(nameof(fields));
-            if (fields.Count < 6) return Authorization.MissingFields;
+            if (fields.Count < 3) return Authorization.MissingFields;
 
-            if (!fields.ContainsKey(Field.AuthDate) ||
-                !fields.ContainsKey(Field.FirstName) ||
-                !fields.ContainsKey(Field.Id) ||
-                !fields.ContainsKey(Field.PhotoUrl) ||
-                !fields.ContainsKey(Field.Username) ||
-                !fields.ContainsKey(Field.Hash)
+            if (!fields.ContainsKey(Field.Id) ||
+                !fields.TryGetValue(Field.AuthDate, out string authDate) ||
+                !fields.TryGetValue(Field.Hash, out string hash)
             ) return Authorization.MissingFields;
 
-            if (fields[Field.Hash].Length != 64) return Authorization.InvalidHash;
+            if (hash.Length != 64) return Authorization.InvalidHash;
 
-            if (!long.TryParse(fields[Field.AuthDate], out long timestamp))
+            if (!long.TryParse(authDate, out long timestamp))
                 return Authorization.InvalidAuthDateFormat;
 
             if (Math.Abs(DateTime.UtcNow.Subtract(_unixStart).TotalSeconds - timestamp) > AllowedTimeOffset)
                 return Authorization.TooOld;
 
-            string data_check_string =
-                Field.AuthDate  + "=" + fields[Field.AuthDate]    + '\n' +
-                Field.FirstName + "=" + fields[Field.FirstName]   + '\n' +
-                Field.Id        + "=" + fields[Field.Id]          + '\n' +
-                (fields.ContainsKey(Field.LastName) ? (Field.LastName + "=" + fields[Field.LastName] + '\n') : "") +
-                Field.PhotoUrl  + "=" + fields[Field.PhotoUrl]    + '\n' +
-                Field.Username  + "=" + fields[Field.Username];
+            fields.Remove(Field.Hash);
+            StringBuilder dataStringBuilder = new StringBuilder(256);
+            foreach (var field in fields)
+            {
+                dataStringBuilder.Append(field.Key);
+                dataStringBuilder.Append('=');
+                dataStringBuilder.Append(field.Value);
+                dataStringBuilder.Append('\n');
+            }
+            dataStringBuilder.Length -= 1; // Remove the last \n
 
-            byte[] signature = _hmac.ComputeHash(Encoding.UTF8.GetBytes(data_check_string));
-            string hash = fields[Field.Hash];
+            byte[] signature = _hmac.ComputeHash(Encoding.UTF8.GetBytes(dataStringBuilder.ToString()));
 
-            // Taken from: bool MihaZupan.Algorithms.Hex.ByteArrayMatchesHexString_Lowercase(byte[] bytes, string hex)
             // Adapted from: https://stackoverflow.com/a/14333437/6845657
             for (int i = 0; i < signature.Length; i++)
             {
@@ -80,8 +78,6 @@ namespace Telegram.Bot.Extensions.LoginWidget
                 if (hash[i * 2 + 1] != 87 + (signature[i] & 0xF) + ((((signature[i] & 0xF) - 10) >> 31) & -39)) return Authorization.InvalidHash;
             }
 
-            // Alternative method (14x slower):
-            // if (BitConverter.ToString(signature).Replace("-", "").ToLower() != hash) return Authorization.InvalidHash;
             return Authorization.Valid;
         }
 
@@ -90,8 +86,19 @@ namespace Telegram.Bot.Extensions.LoginWidget
         /// </summary>
         /// <param name="fields">A collection containing query string fields as key-value pairs</param>
         /// <returns></returns>
+        public Authorization CheckAuthorization(Dictionary<string, string> fields)
+        {
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
+            return CheckAuthorization(new SortedDictionary<string, string>(fields, StringComparer.Ordinal));
+        }
+
+        /// <summary>
+        /// Checks whether the authorization data received from the user is valid
+        /// </summary>
+        /// <param name="fields">A collection containing query string fields as key-value pairs</param>
+        /// <returns></returns>
         public Authorization CheckAuthorization(IEnumerable<KeyValuePair<string, string>> fields) =>
-            CheckAuthorization(fields.ToDictionary(f => f.Key, f => f.Value));
+            CheckAuthorization(fields?.ToDictionary(f => f.Key, f => f.Value, StringComparer.Ordinal));
 
         /// <summary>
         /// Checks whether the authorization data received from the user is valid
@@ -99,7 +106,7 @@ namespace Telegram.Bot.Extensions.LoginWidget
         /// <param name="fields">A collection containing query string fields as key-value pairs</param>
         /// <returns></returns>
         public Authorization CheckAuthorization(IEnumerable<Tuple<string, string>> fields) =>
-            CheckAuthorization(fields.ToDictionary(f => f.Item1, f => f.Item2));
+            CheckAuthorization(fields?.ToDictionary(f => f.Item1, f => f.Item2, StringComparer.Ordinal));
 
         public void Dispose()
         {
@@ -113,11 +120,7 @@ namespace Telegram.Bot.Extensions.LoginWidget
         private static class Field
         {
             public const string AuthDate = "auth_date";
-            public const string FirstName = "first_name";
-            public const string LastName = "last_name";
             public const string Id = "id";
-            public const string PhotoUrl = "photo_url";
-            public const string Username = "username";
             public const string Hash = "hash";
         }
     }

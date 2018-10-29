@@ -7,7 +7,7 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
 {
     public class LoginWidgetTestsFixture
     {
-        private const int _testCount = 12;
+        private const int _testCount = 10;
 
         private static readonly Random _random = new Random();
 
@@ -15,9 +15,43 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
 
         public readonly string CurrentTimestamp;
 
-        public readonly Dictionary<string, string>[] ValidTests = new Dictionary<string, string>[_testCount];
+        public const string RealLifeDataTests_Token = "324335643:AAHdDjFRqowmRegO7AHW4PzayNFzkIoMOww";
+        public static readonly SortedDictionary<string, string>[] RealLifeDataTests = new SortedDictionary<string, string>[]
+        {
+            new SortedDictionary<string, string>()
+            {
+                { "id", "168175103" },
+                { "first_name", "Miha" },
+                { "last_name", "Zupan" },
+                { "username", "MihaZupan" },
+                { "photo_url", "https://t.me/i/userpic/320/MihaZupan.jpg" },
+                { "auth_date", "1540852587" },
+                { "hash", "5b108abf4749846e96c4aa449eb65246c500d29cd6711463166bd2ffcf87285f" }
+            },
+            new SortedDictionary<string, string>()
+            {
+                { "id", "168175103" },
+                { "first_name", "Miha" },
+                { "last_name", "Zupan" },
+                { "username", "MihaZupan" },
+                { "photo_url", "https://t.me/i/userpic/320/MihaZupan.jpg" },
+                { "auth_date", "1540852662" },
+                { "hash", "2f917a0cbd0779cc1f06bc089ebc9079dc946818117d5e2e1ebfdcaa9c60d797" }
+            },
+            new SortedDictionary<string, string>()
+            {
+                { "id", "168175103" },
+                { "first_name", "Miha" },
+                { "last_name", "Zupan" },
+                { "username", "MihaZupan" },
+                { "photo_url", "https://t.me/i/userpic/320/MihaZupan.jpg" },
+                { "auth_date", "1540852698" },
+                { "hash", "7855000860fb319cf98c9f26456fd5b9d078d0cfef88997392334be0c1c6b10c" }
+            }
+        };
 
-        public readonly Dictionary<string, string>[] InvalidTests = new Dictionary<string, string>[_testCount];
+        public readonly SortedDictionary<string, string>[] ValidTests   = new SortedDictionary<string, string>[_testCount];
+        public readonly SortedDictionary<string, string>[] InvalidTests = new SortedDictionary<string, string>[_testCount];
 
         public LoginWidgetTestsFixture()
         {
@@ -39,14 +73,10 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
         {
             for (int i = 0; i < _testCount; i++)
             {
-                Dictionary<string, string> fields = new Dictionary<string, string>
+                SortedDictionary<string, string> fields = new SortedDictionary<string, string>
                 {
                     { "auth_date", CurrentTimestamp },
-                    { "first_name", RandomString() },
-                    { "last_name", RandomString() },
                     { "id", RandomString() },
-                    { "photo_url", RandomString() },
-                    { "username", RandomString() }
                 };
                 fields.Add("hash", ComputeHash(fields, hmac));
 
@@ -59,15 +89,12 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             for (int i = 0; i < _testCount; i++)
             {
                 // replace field with random data
-                Dictionary<string, string> fields = new Dictionary<string, string>
+                SortedDictionary<string, string> fields = new SortedDictionary<string, string>
                 {
                     { "auth_date",  CurrentTimestamp },
-                    { "first_name", (i % 6) == 0 ? RandomString() : ValidTests[i]["first_name"] },
-                    { "id",         (i % 6) == 1 ? RandomString() : ValidTests[i]["id"] },
-                    { "photo_url",  (i % 6) == 2 ? RandomString() : ValidTests[i]["photo_url"] },
-                    { "username",   (i % 6) == 3 ? RandomString() : ValidTests[i]["username"] },
-                    { "last_name",  (i % 6) == 4 ? RandomString() : ValidTests[i]["last_name"] },
-                    { "hash",       (i % 6) == 5 ? RandomString(_random.Next() % 2 == 0 ? 64 : _random.Next(1, 100)) : ValidTests[i]["hash"] }
+                    { "id",         (i % 2) == 0 ? RandomString()   : ValidTests[i]["id"] },
+                    { "hash",       (i % 2) == 1 ? RandomString(64) : ValidTests[i]["hash"] },
+                    { RandomString(), RandomString() }
                 };
 
                 InvalidTests[i] = fields;
@@ -84,17 +111,20 @@ namespace Telegram.Bot.Extensions.LoginWidget.Tests.Unit
             }
         }
         
-        private static string ComputeHash(Dictionary<string, string> fields, HMACSHA256 hmac)
+        private static string ComputeHash(SortedDictionary<string, string> fields, HMACSHA256 hmac)
         {
-            string data_check_string =
-                "auth_date=" + fields["auth_date"] + '\n' +
-                "first_name=" + fields["first_name"] + '\n' +
-                "id=" + fields["id"] + '\n' +
-                (fields.ContainsKey("last_name") ? ("last_name=" + fields["last_name"] + '\n') : "") +
-                "photo_url=" + fields["photo_url"] + '\n' +
-                "username=" + fields["username"];
+            fields.Remove("hash");
+            StringBuilder dataStringBuilder = new StringBuilder(256);
+            foreach (KeyValuePair<string, string> field in fields)
+            {
+                dataStringBuilder.Append(field.Key);
+                dataStringBuilder.Append('=');
+                dataStringBuilder.Append(field.Value);
+                dataStringBuilder.Append('\n');
+            }
+            dataStringBuilder.Length -= 1; // Remove the last \n
 
-            byte[] signature = hmac.ComputeHash(Encoding.UTF8.GetBytes(data_check_string));
+            byte[] signature = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataStringBuilder.ToString()));
 
             return BitConverter.ToString(signature).Replace("-", "").ToLower();
         }

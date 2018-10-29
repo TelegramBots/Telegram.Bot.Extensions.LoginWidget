@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
 	<AssemblyName>Telegram.Bot.Extensions.LoginWidget</AssemblyName>
 	<RootNamespace>Telegram.Bot.Extensions.LoginWidget</RootNamespace>
 	<LangVersion>latest</LangVersion>
@@ -20,11 +20,5 @@
 	<Version>1.1.0</Version>
 	<FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Reference Include="System">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\System.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Telegram.Bot.Extensions.LoginWidget
+namespace Telegram.Bot.Extensions.LoginWidget
 {
     /// <summary>
     /// Generates JavaScript embed code matching the one found on https://core.telegram.org/widgets/login
@@ -30,7 +30,7 @@
             bool showUserPhoto = true,
             bool requestAccess = true)
         {
-            return GenerateBaseEmbedCode(botName, buttonStyle, showUserPhoto, requestAccess, $"data-onauth=\"{callbackFunctionName}({callbackParameterName})\"");
+            return GenerateBaseEmbedCode(botName, buttonStyle, showUserPhoto, requestAccess, string.Concat("data-onauth=\"", callbackFunctionName, "(", callbackParameterName, ")\""));
         }
 
         /// <summary>
@@ -54,13 +54,13 @@
 
         private static string GenerateBaseEmbedCode(string botName, ButtonStyle buttonStyle, bool showUserPhoto, bool requestAccess, string data_auth)
         {
-            return
-                "<script async src=\"https://telegram.org/js/telegram-widget.js?" +
-                LoginWidgetJsVersion + "\" data-telegram-login=\"" +
-                botName + "\" data-size=\"" + buttonStyle.ToString().ToLower() + "\" " +
-                (showUserPhoto ? "" : "data-userpic=\"false\" ") +
-                (requestAccess ? "data-request-access=\"write\" " : "") +
-                data_auth + "></script>";
+            return string.Concat(
+                "<script async src=\"https://telegram.org/js/telegram-widget.js?",
+                LoginWidgetJsVersion, "\" data-telegram-login=\"",
+                botName, "\" data-size=\"" + buttonStyle.ToString().ToLower(), "\" ",
+                (showUserPhoto ? "" : "data-userpic=\"false\" "),
+                (requestAccess ? "data-request-access=\"write\" " : ""),
+                data_auth, "></script>");
         }
     }
 }

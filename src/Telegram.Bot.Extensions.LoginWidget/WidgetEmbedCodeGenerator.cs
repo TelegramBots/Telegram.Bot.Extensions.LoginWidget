@@ -6,9 +6,9 @@
     public class WidgetEmbedCodeGenerator
     {
         /// <summary>
-        /// Defaults to 4
+        /// Defaults to 5
         /// </summary>
-        public static int LoginWidgetJsVersion = 4;
+        public static int LoginWidgetJsVersion = 5;
 
         private WidgetEmbedCodeGenerator() { }
 

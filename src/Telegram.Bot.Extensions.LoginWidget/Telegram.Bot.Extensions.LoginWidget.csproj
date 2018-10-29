@@ -17,8 +17,9 @@
 	<PackageIconUrl>https://telegram.org/img/t_logo.png</PackageIconUrl>
 	<PackageId>Telegram.Bot.Extensions.LoginWidget</PackageId>
 	<Product>Telegram.Bot.Extensions.LoginWidget</Product>
-	<Version>1.1.0</Version>
-	<FileVersion>1.1.0.0</FileVersion>
+	<Version>1.2.0</Version>
+	<FileVersion>1.2.0.0</FileVersion>
+	<AssemblyVersion>1.2.0.0</AssemblyVersion>
   </PropertyGroup>
 
 </Project>

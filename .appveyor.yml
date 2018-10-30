@@ -1,0 +1,16 @@
+version: '{build}'
+max_jobs: 1
+
+image: Visual Studio 2017
+configuration: Release
+
+before_build:
+  - nuget restore -verbosity quiet
+
+build:
+  project: Telegram.Bot.Extensions.LoginWidget.sln
+  verbosity: minimal
+
+test_script:
+  - cd test/Telegram.Bot.Extensions.LoginWidget.Tests.Unit
+  - dotnet test -c Release --no-build

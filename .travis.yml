@@ -1,0 +1,14 @@
+dist: trusty
+sudo: false
+
+language: csharp
+mono: none
+dotnet: 2.1.403
+
+script: >
+  dotnet build -c Release &&
+  cd test/Telegram.Bot.Extensions.LoginWidget.Tests.Unit &&
+  dotnet test -c Release --no-build
+
+notifications:
+  email: false

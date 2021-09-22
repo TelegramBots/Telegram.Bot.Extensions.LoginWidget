@@ -62,10 +62,13 @@ namespace Telegram.Bot.Extensions.LoginWidget
             StringBuilder dataStringBuilder = new StringBuilder(256);
             foreach (var field in fields)
             {
-                dataStringBuilder.Append(field.Key);
-                dataStringBuilder.Append('=');
-                dataStringBuilder.Append(field.Value);
-                dataStringBuilder.Append('\n');
+                if (!string.IsNullOrEmpty(field.Value))
+                {
+                    dataStringBuilder.Append(field.Key);
+                    dataStringBuilder.Append('=');
+                    dataStringBuilder.Append(field.Value);
+                    dataStringBuilder.Append('\n');
+                }
             }
             dataStringBuilder.Length -= 1; // Remove the last \n
 

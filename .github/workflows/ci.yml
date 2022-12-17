@@ -1,0 +1,112 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Run CI
+
+on:
+  push:
+    branches-ignore: [ "master" ]
+  pull_request:
+    branches-ignore: [ "master" ]
+
+env:
+  versionPrefix: 2.0.0
+  versionSuffix: 'preview.1'
+  buildConfiguration: Release
+  netSdkVersion: 7.0.x
+  ciVersionSuffix: ci.$GITHUB_RUN_ID+git.commit.$GITHUB_SHA
+  projectPath: src/Telegram.Bot.Extensions.LoginWidget/Telegram.Bot.Extensions.LoginWidget.csproj
+  testsProject: test/Telegram.Bot.Extensions.LoginWidget.Tests.Unit/Telegram.Bot.Extensions.LoginWidget.Tests.Unit.csproj
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set env
+      run: |
+        echo "isPreRelease=${{ env.versionSuffix != '' }}" >> $GITHUB_ENV
+        if [ isPreRelease ]; then
+          echo "releaseVersion='${{ env.versionPrefix }}-${{ env.versionSuffix }}'" >> $GITHUB_ENV
+        else
+          echo "releaseVersion='${{ env.versionPrefix }}'" >> $GITHUB_ENV
+        fi
+        if [ isPreRelease ]; then
+          echo "ciVersion='${{ env.versionPrefix }}-${{ env.versionSuffix }}.${{ env.ciVersionSuffix }}'" >> $GITHUB_ENV
+        else
+          echo "ciVersion='${{ env.versionPrefix }}-${{ env.ciVersionSuffix }}'" >> $GITHUB_ENV
+        fi
+
+    - name: Test env
+      run: |
+        echo "versionPrefix:      ${{ env.versionPrefix }}"
+        echo "versionSuffix:      ${{ env.versionSuffix }}"
+        echo "ciVersionSuffix:    ${{ env.ciVersionSuffix }}"
+        echo "isPreRelease:       ${{ env.isPreRelease }}"
+        echo "releaseVersion:     ${{ env.releaseVersion }}"
+        echo "ciVersion:          ${{ env.ciVersion }}"
+        echo "buildConfiguration: ${{ env.buildConfiguration }}"
+        echo "projectPath:        ${{ env.projectPath }}"
+        echo "testsProject:       ${{ env.testsProject }}"
+
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.netSdkVersion }}
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        # Look to see if there is a cache hit for the corresponding requirements file
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: |
+        dotnet build \
+          --no-restore \
+          --configuration ${{ env.buildConfiguration }} \
+          -p:Version=${{ env.ciVersion }} \
+          -p:CI_EMBED_SYMBOLS=true \
+          ${{ env.projectPath }}
+
+    - name: Test
+      run: |
+        dotnet test \
+          --no-restore \
+          --verbosity normal \
+          --configuration ${{ env.buildConfiguration }} \
+          --logger "trx;LogFileName=testresults.trx" \
+          ${{ env.testsProject }}
+
+    - name: Add GitHub Repo
+      run: |
+        dotnet nuget add source \
+          --username USERNAME \
+          --password ${{ secrets.GITHUB_TOKEN }} \
+          --store-password-in-clear-text \
+          --name github "https://nuget.pkg.github.com/karb0f0s/index.json"
+
+    - name: Pack nuget
+      run: |
+        dotnet pack \
+          --no-build \
+          --output "packages/" \
+          --configuration ${{ env.buildConfiguration }} \
+          -p:Version=${{ env.ciVersion }} \
+          -p:CI_EMBED_SYMBOLS=true \
+          ${{ env.projectPath }}
+
+    - name: Pack nuget
+      run: |
+        dotnet nuget push \
+          packages/*.nupkg \
+          --api-key ${{ secrets.PUBLISH_TOKEN }} \
+          --source "github"

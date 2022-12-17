@@ -1,25 +1,69 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-	<AssemblyName>Telegram.Bot.Extensions.LoginWidget</AssemblyName>
-	<RootNamespace>Telegram.Bot.Extensions.LoginWidget</RootNamespace>
-	<LangVersion>latest</LangVersion>
-	<Copyright>Copyright © github.com/TelegramBots team 2018</Copyright>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	<Description>Allows you to generate embed JavaScript for the Telegram login widget and verify the hashes received.</Description>
-	<PackageLicenseUrl>https://raw.githubusercontent.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget/master/LICENSE</PackageLicenseUrl>
-	<Company>github.com/TelegramBots</Company>
-	<Authors>MihaZupan,TelegramBots</Authors>
-	<PackageProjectUrl>https://github.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget.git</RepositoryUrl>
-	<PackageTags>Telegram;Bot;Api;Telegram-login;Login-widget;</PackageTags>
-	<PackageIconUrl>https://telegram.org/img/t_logo.png</PackageIconUrl>
-	<PackageId>Telegram.Bot.Extensions.LoginWidget</PackageId>
-	<Product>Telegram.Bot.Extensions.LoginWidget</Product>
-	<Version>1.2.0</Version>
-	<FileVersion>1.2.0.0</FileVersion>
-	<AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <LangVersion>11</LangVersion>
+    <Nullable>enable</Nullable>
+    <WarningLevel>7</WarningLevel>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Title>Telegram Bot Login Widget</Title>
+    <Description>
+      Allows you to generate embed JavaScript for the Telegram login widget and verify the hashes received.
+    </Description>
+    <PackageId>Telegram.Bot.Extensions.LoginWidget</PackageId>
+    <Authors>MihaZupan,TelegramBots</Authors>
+    <Copyright>Copyright © github.com/TelegramBots team 2018</Copyright>
+    <PackageIcon>package-icon.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget.git</RepositoryUrl>
+    <PackageTags>Telegram;Bot;Api;Telegram-login;Login-widget;</PackageTags>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>
+      $(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb
+    </AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <!--
+      <license>https://raw.githubusercontent.com/TelegramBots/Telegram.Bot.Extensions.LoginWidget/master/LICENSE</license>
+      <Company>github.com/TelegramBots</Company>
+      <Product>Telegram.Bot.Extensions.LoginWidget</Product>
+      <Version>1.2.1</Version>
+      <FileVersion>1.2.1.0</FileVersion>
+      <AssemblyVersion>1.2.1.0</AssemblyVersion>
+      <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../package-icon.png">
+      <Pack>true</Pack>
+      <PackagePath>/</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup Label="Warnings">
+    <NoWarn>$(NoWarn);MA0046;MA0048</NoWarn>
+  </PropertyGroup>
+
+  <!-- Make build deterministic only in CI environment to make local development easier with non-trimmed paths -->
+  <!-- TF_BUILD is a predefined variable in Azure Pipelines -->
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup Label="Dev">
+    <PackageReference Include="Meziantou.Analyzer" Version="1.0.757" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="all" />
+  </ItemGroup>
 
 </Project>

@@ -1,0 +1,62 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches-ignore: [ "master" ]
+  pull_request:
+    branches-ignore: [ "master" ]
+
+env:
+  versionPrefix: 2.0.0
+  versionSuffix: 'preview.1'
+  ciVersionSuffix: ci.${{ env.GITHUB_RUN_ID }}+git.commit.${{ env.GITHUB_SHA }}
+  isPreRelease: ${{ env.versionSuffix != '' }}
+  releaseVersion:
+  ciVersion:
+  buildConfiguration: Release
+  projectPath: src/Telegram.Bot.Extensions.LoginWidget/Telegram.Bot.Extensions.LoginWidget.csproj
+  testsProject: test/Telegram.Bot.Extensions.LoginWidget.Tests.Unit/Telegram.Bot.Extensions.LoginWidget.Tests.Unit.csproj
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Test env
+      run: |
+        echo "versionPrefix:      ${{ env.versionPrefix }}"
+        echo "versionSuffix:      ${{ env.versionSuffix }}"
+        echo "ciVersionSuffix:    ${{ env.ciVersionSuffix }}"
+        echo "isPreRelease:       ${{ env.isPreRelease }}"
+        echo "releaseVersion:     ${{ env.releaseVersion }}"
+        echo "ciVersion:          ${{ env.ciVersion }}"
+        echo "buildConfiguration: ${{ env.buildConfiguration }}"
+        echo "projectPath:        ${{ env.projectPath }}"
+        echo "testsProject:       ${{ env.testsProject }}"
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: |
+        dotnet build
+        --no-restore
+        --configuration ${{ env.buildConfiguration }}
+        -p:Version=${{ env.ciVersion }}
+        -p:CI_EMBED_SYMBOLS=true
+        ${{ env.projectPath }}
+    - name: Test
+      run: |
+        dotnet test
+        --no-restore
+        --verbosity normal
+        --configuration ${{ env.buildConfiguration }}
+        --logger "trx;LogFileName=testresults.trx"
+        ${{ env.testsProject }}
